@@ -1,8 +1,29 @@
-trigger:
-  - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+name: regression CI job
 
-pool:
-  vmImage: ubuntu-latest
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 16,19,23 * * 1-5'   # Runs at 9am, 12pm, and 4pm MT on weekdays
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
 
 steps:
   - task: Maven@3
