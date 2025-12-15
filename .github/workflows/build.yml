@@ -1,0 +1,41 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml'
+      mavenOptions: '-Xmx3072m'
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: '1.11'
+      jdkArchitectureOption: 'x64'
+      publishJUnitResults: true
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      goals: 'package'
+
+  - name: Load test report history
+    uses: actions/checkout@v3
+    if: always()
+    continue-on-error: true
+    with:
+      ref: gh-pages
+      path: gh-pages
+
+  - name: Build test report
+    uses: simple-elf/allure-report-action@v1.7
+    if: always()
+    with:
+      gh_pages: gh-pages
+      allure_history: allure-history
+      allure_results: allure-results
+
+  - name: Publish test report
+    uses: peaceiris/actions-gh-pages@v4
+    if: always()
+    with:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PUBLISH_BRANCH: gh-pages
+      PUBLISH_DIR: allure-history
